@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { INITIAL_CREDITS } from 'config/credits';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -12,7 +13,6 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error && data.user) {
       const userId = data.user.id;
-      const initialCredits = 100; // TODO: Make this configurable (e.g., from environment variables or a config table)
       const creditsTableName = 'user_credits'; // TODO: Confirm actual table name
 
       // Atomically allocate initial credits if the user doesn't have an entry yet.
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       const { error: creditError } = await supabase
         .from(creditsTableName)
         .insert(
-          [{ user_id: userId, amount: initialCredits }],
+          [{ user_id: userId, amount: INITIAL_CREDITS }],
           { onConflict: 'user_id', ignoreDuplicates: true }
         );
 

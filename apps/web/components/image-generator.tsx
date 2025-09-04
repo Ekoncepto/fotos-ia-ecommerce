@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { IMAGE_GENERATION_COST } from 'config/credits';
 
 export default function ImageGenerator() {
   const [credits, setCredits] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
-
-  const IMAGE_GENERATION_COST = 10; // Must match backend cost
 
   useEffect(() => {
     async function fetchCredits() {

@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-
-const IMAGE_GENERATION_COST = 10; // Assuming 10 credits per image generation
+import { IMAGE_GENERATION_COST } from 'config/credits';
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -12,40 +11,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // 1. Check user's credit balance
-  const { data: creditsData, error: fetchCreditsError } = await supabase
-    .from('user_credits')
-    .select('amount')
-    .eq('user_id', user.id)
-    .single();
+  const { data, error } = await supabase.rpc('deduct_credits', {
+    user_id_input: user.id,
+    cost: IMAGE_GENERATION_COST,
+  });
 
-  if (fetchCreditsError) {
-    console.error('Error fetching credit balance for image generation:', fetchCreditsError);
-    return NextResponse.json({ error: 'Failed to fetch credit balance' }, { status: 500 });
-  }
-
-  const currentCredits = creditsData?.amount || 0;
-
-  // 2. Handle insufficient credit scenarios
-  if (currentCredits < IMAGE_GENERATION_COST) {
-    return NextResponse.json({ error: 'Insufficient credits' }, { status: 403 });
-  }
-
-  // 3. Deduct credits
-  const newCredits = currentCredits - IMAGE_GENERATION_COST;
-  const { error: updateCreditsError } = await supabase
-    .from('user_credits')
-    .update({ amount: newCredits })
-    .eq('user_id', user.id);
-
-  if (updateCreditsError) {
-    console.error('Error deducting credits for image generation:', updateCreditsError);
+  if (error) {
+    if (error.message.includes('Insufficient credits')) {
+      return NextResponse.json({ error: 'Insufficient credits' }, { status: 403 });
+    }
+    console.error('Error deducting credits:', error);
     return NextResponse.json({ error: 'Failed to deduct credits' }, { status: 500 });
   }
 
-  // 4. Proceed with (placeholder) image generation
   // TODO: Integrate with actual image generation service (e.g., Gemini API)
-  console.log(`User ${user.id} generated an image. Remaining credits: ${newCredits}`);
+  console.log(`User ${user.id} generated an image. Remaining credits: ${data}`);
 
-  return NextResponse.json({ message: 'Image generation successful', remainingCredits: newCredits }, { status: 200 });
+  return NextResponse.json({ message: 'Image generation successful', remainingCredits: data }, { status: 200 });
 }

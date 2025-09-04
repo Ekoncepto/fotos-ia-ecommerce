@@ -1,46 +1,48 @@
 schema: 1
 story: '1.3.1'
+story_title: 'Sistema de Créditos'
 gate: CONCERNS
-status_reason: 'High risks identified in credit allocation, consumption, and security require attention.'
-reviewer: 'Quinn'
-updated: '2025-09-04T21:15:50Z'
+status_reason: 'The core functionality is present, but the lack of integration and concurrency tests for the credit system is a significant gap that should be addressed.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-09-04T23:00:00Z'
+
 top_issues:
-  - id: 'TECH-001'
-    severity: high
-    finding: 'Inconsistent Credit Allocation on Signup'
-    suggested_action: 'Implement atomic transactions and robust testing for credit allocation.'
-  - id: 'TECH-002'
-    severity: high
-    finding: 'Credit Consumption Logic Errors'
-    suggested_action: 'Implement server-side validation and idempotent operations for credit deduction.'
-  - id: 'SEC-001'
-    severity: high
-    finding: 'Credit Manipulation/Exploitation'
-    suggested_action: 'Implement strong authentication, authorization, and rate limiting for credit-related API endpoints.'
+  - severity: medium
+    description: 'Missing integration tests for the credit system.'
+    suggested_owner: dev
+  - severity: medium
+    description: 'Missing concurrent tests to explicitly test for race conditions.'
+    suggested_owner: dev
+
 waiver: { active: false }
-trace:
-  totals:
-    requirements: 4
-    full: 2
-    partial: 2
-    none: 0
-  uncovered:
-    - ac: 'AC1'
-      reason: 'Lack of atomicity and race condition coverage.'
-    - ac: 'AC3'
-      reason: 'Lack of idempotency coverage.'
-  notes: 'See docs/qa/assessments/1.3.1-sistema-creditos-trace-20250904.md'
+
+quality_score: 80
+
+evidence:
+  tests_reviewed: 20
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4]
+    ac_gaps: []
+
 nfr_validation:
-  _assessed: [security, performance, reliability, maintainability]
   security:
     status: CONCERNS
-    notes: 'Missing rate limiting on credit-related APIs.'
+    notes: 'Race condition fixed, but rate limiting is still needed.'
   performance:
     status: PASS
-    notes: 'No specific performance requirements defined.'
+    notes: 'No issues identified.'
   reliability:
-    status: FAIL
-    notes: 'Credit allocation is not atomic and consumption is not idempotent.'
+    status: PASS
+    notes: 'Race condition fixed.'
   maintainability:
-    status: CONCERNS
-    notes: 'Lack of robust tests for critical business logic.'
+    status: PASS
+    notes: 'Configuration centralized.'
+
+recommendations:
+  immediate:
+    - action: 'Add integration tests for the credit system.'
+      refs: ['apps/web/app/api/credits/route.ts', 'apps/web/app/api/generate-image/route.ts']
+  future:
+    - action: 'Implement rate limiting on credit-related APIs.'
+      refs: ['docs/tech-debt/rate-limiting.md']

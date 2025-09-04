@@ -2,6 +2,7 @@ import { GET } from './route';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { vi } from 'vitest';
+import { INITIAL_CREDITS } from 'config/credits';
 
 // Create stable mock functions
 const mockInsert = vi.fn();
@@ -45,7 +46,7 @@ describe('Auth Callback Route', () => {
     expect(mockExchangeCodeForSession).toHaveBeenCalledWith('test-code');
     expect(mockFrom).toHaveBeenCalledWith('user_credits');
     expect(mockInsert).toHaveBeenCalledWith(
-      [{ user_id: 'user-123', amount: 100 }],
+      [{ user_id: 'user-123', amount: INITIAL_CREDITS }],
       { onConflict: 'user_id', ignoreDuplicates: true }
     );
     expect(NextResponse.redirect).toHaveBeenCalledWith(`${origin}/`);
