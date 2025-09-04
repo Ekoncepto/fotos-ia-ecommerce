@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
-import { v4 as uuidv4 } from 'uuid';
+import DOMPurify from 'dompurify';
 
 export function ImageUploadForm() {
   const supabase = createClient();
@@ -21,6 +21,7 @@ export function ImageUploadForm() {
   const [category, setCategory] = React.useState("");
   const [files, setFiles] = React.useState<FileList | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const isButtonDisabled = !productName || !category || !files || files.length === 0 || isSubmitting;
 
@@ -41,23 +42,27 @@ export function ImageUploadForm() {
 
       const referenceImageUrls: string[] = [];
       for (const file of Array.from(files)) {
-        const filePath = `${user.id}/${uuidv4()}`;
-        const { data, error: uploadError } = await supabase.storage
-          .from("product-images")
-          .upload(filePath, file);
+        const formData = new FormData();
+        formData.append("file", file);
 
-        if (uploadError) {
-          throw uploadError;
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const { error } = await response.json();
+          throw new Error(error || "Falha no upload da imagem.");
         }
 
-        const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(data.path);
+        const { publicUrl } = await response.json();
         referenceImageUrls.push(publicUrl);
       }
 
       const { error: insertError } = await supabase.from("products").insert({
         user_id: user.id,
-        name: productName,
-        information: category,
+        name: DOMPurify.sanitize(productName),
+        information: DOMPurify.sanitize(category),
         reference_image_urls: referenceImageUrls,
       });
 
@@ -70,8 +75,9 @@ export function ImageUploadForm() {
       setProductName("");
       setCategory("");
       setFiles(null);
-      const fileInput = document.getElementById('pictures') as HTMLInputElement;
-      if(fileInput) fileInput.value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
 
     } catch (error) {
       console.error("Erro no envio:", error);
@@ -118,6 +124,7 @@ export function ImageUploadForm() {
                 id="pictures"
                 type="file"
                 multiple
+                ref={fileInputRef}
                 onChange={(e) => setFiles(e.target.files)}
                 disabled={isSubmitting}
               />
