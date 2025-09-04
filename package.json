@@ -13,7 +13,13 @@
     "packages/*"
   ],
   "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "turbo": "latest"
   },
-  "packageManager": "npm@10.5.0"
+  "packageManager": "npm@10.5.0",
+  "dependencies": {
+    "uuid": "^11.1.0"
+  }
 }
