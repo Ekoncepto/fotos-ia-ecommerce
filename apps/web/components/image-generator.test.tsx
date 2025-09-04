@@ -1,5 +1,6 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ImageGenerator from './image-generator';
+import { vi } from 'vitest';
 
 // Mock Next.js router
 vi.mock('next/navigation', () => ({
@@ -9,87 +10,74 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('ImageGenerator', () => {
+  // Use a stable mock function for fetch
   const mockFetch = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = mockFetch; // Mock global fetch
+    // Intercept global fetch
+    global.fetch = mockFetch;
   });
 
-  it('should display loading state initially', () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 100 }) });
-    act(() => {
-      render(<ImageGenerator />);
-    });
+  it('should display loading state initially', async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ amount: 100 }) });
+    render(<ImageGenerator />);
     expect(screen.getByText('Carregando créditos...')).toBeInTheDocument();
+    // Wait for the component to finish loading
+    await screen.findByText('Créditos disponíveis: 100');
   });
 
   it('should display credits and enable button if sufficient credits', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 100 }) });
-    act(() => {
-      render(<ImageGenerator />);
-    });
-    await waitFor(() => expect(screen.getByText('Créditos disponíveis: 100')).toBeInTheDocument());
+    mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ amount: 100 }) });
+    render(<ImageGenerator />);
+    await screen.findByText('Créditos disponíveis: 100');
     expect(screen.getByRole('button', { name: 'Gerar Fotos' })).toBeEnabled();
   });
 
   it('should display insufficient credits message and disable button if insufficient credits', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 5 }) });
-    act(() => {
-      render(<ImageGenerator />);
-    });
-    await waitFor(() => expect(screen.getByText('Créditos disponíveis: 5')).toBeInTheDocument());
+    mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ amount: 5 }) });
+    render(<ImageGenerator />);
+    await screen.findByText('Créditos disponíveis: 5');
     expect(screen.getByRole('button', { name: 'Gerar Fotos' })).toBeDisabled();
-    expect(screen.getByText(/Você não tem créditos suficientes para gerar imagens/i)).toBeInTheDocument();
+    expect(screen.getByText('Você não tem créditos suficientes para gerar imagens.')).toBeInTheDocument();
   });
 
   it('should deduct credits and show success message on successful generation', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 100 }) }); // Initial credits
-    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ message: 'Image generation successful', remainingCredits: 90 }) }); // Generate image
+    // Mock initial credit fetch
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 100 }) });
+    // Mock generate image fetch
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ message: 'Image generation successful', remainingCredits: 90 }) });
 
-    act(() => {
-      render(<ImageGenerator />);
-    });
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Gerar Fotos' })).toBeEnabled());
+    render(<ImageGenerator />);
 
-    act(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Gerar Fotos' }));
-    });
+    const button = await screen.findByRole('button', { name: 'Gerar Fotos' });
+    fireEvent.click(button);
 
-    await waitFor(() => expect(screen.getByText('Imagem gerada com sucesso!')).toBeInTheDocument());
+    await screen.findByText('Imagem gerada com sucesso!');
     expect(screen.getByText('Créditos disponíveis: 90')).toBeInTheDocument();
   });
 
   it('should show error message if image generation fails', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 100 }) }); // Initial credits
-    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 }); // Generate image fails
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 100 }) });
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
 
-    act(() => {
-      render(<ImageGenerator />);
-    });
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Gerar Fotos' })).toBeEnabled());
+    render(<ImageGenerator />);
 
-    act(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Gerar Fotos' }));
-    });
+    const button = await screen.findByRole('button', { name: 'Gerar Fotos' });
+    fireEvent.click(button);
 
-    await waitFor(() => expect(screen.getByText('Erro ao gerar imagem.')).toBeInTheDocument());
+    await screen.findByText('Erro ao gerar imagem.');
   });
 
   it('should show insufficient credits message if backend returns 403', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 5 }) }); // Initial credits
-    mockFetch.mockResolvedValueOnce({ ok: false, status: 403 }); // Generate image returns 403
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 100 }) });
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 403, json: () => Promise.resolve({ error: 'Insufficient credits' }) });
 
-    act(() => {
-      render(<ImageGenerator />);
-    });
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Gerar Fotos' })).toBeDisabled());
+    render(<ImageGenerator />);
 
-    // Even if button is disabled, if somehow clicked (e.g., direct function call), it should handle 403
-    act(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Gerar Fotos' }));
-    });
+    const button = await screen.findByRole('button', { name: 'Gerar Fotos' });
+    fireEvent.click(button);
 
-    await waitFor(() => expect(screen.getByText(/Créditos insuficientes para gerar imagens/i)).toBeInTheDocument());
+    await screen.findByText('Créditos insuficientes para gerar imagens.');
   });
 });
