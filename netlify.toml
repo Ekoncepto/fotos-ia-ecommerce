@@ -1,0 +1,19 @@
+# Netlify configuration file
+
+[build]
+  # Command to build the site
+  command = "turbo build --filter=web"
+
+  # Directory to publish
+  publish = "apps/web/.next"
+
+[build.environment]
+  # Set the Node.js version
+  NODE_VERSION = "20"
+
+  # Set the npm version
+  NPM_VERSION = "10.5.0"
+
+[[plugins]]
+  # Essential Next.js plugin for Netlify
+  package = "@netlify/plugin-nextjs"
