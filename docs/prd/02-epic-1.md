@@ -22,7 +22,7 @@
   3. Se um usuário se autenticar pela primeira vez, uma conta deve ser criada para ele automaticamente em nosso sistema.
   4. Após o login, o usuário deve ser redirecionado para a página principal da aplicação.
 
-### **História 1.3: Sistema de Créditos e Teste Gratuito**
+### **História 1.3.1: Sistema de Créditos e Teste Gratuito**
 
 **Como** um novo usuário, **eu quero** receber um saldo inicial de créditos gratuitos ao me cadastrar, **para que** eu possa testar a funcionalidade principal do produto.
 
@@ -32,7 +32,7 @@
   3. A geração de um pacote de imagens deve consumir um número predefinido de créditos.
   4. Se o usuário não tiver créditos suficientes, o botão "Gerar Fotos" deve exibir uma mensagem clara informando a situação.
 
-### **História 1.4: Interface de Envio de Produto via Upload Manual (Focada)**
+### **História 1.3.2: Interface de Envio de Produto via Upload Manual (Focada)**
 
 **Como** um vendedor, **eu quero** uma interface clara para fazer o upload das minhas fotos de referência e inserir as informações do produto, **para que** eu possa iniciar o processo de geração de fotos.
 
@@ -41,7 +41,7 @@
   2. A interface deve conter campos de texto para o nome e a categoria do produto.
   3. Um botão "Gerar Fotos" deve ficar ativo somente após o preenchimento das informações necessárias.
 
-### **História 1.5: Geração de Pacote de Imagens Essencial (Simplificada)**
+### **História 1.4: Geração de Pacote de Imagens Essencial (Simplificada)**
 
 **Como** um vendedor, **eu quero**, após clicar em "Gerar Fotos", receber um pacote com as duas imagens mais importantes para o meu anúncio, **para que** eu possa atrair cliques e aumentar a confiança do comprador.
 
