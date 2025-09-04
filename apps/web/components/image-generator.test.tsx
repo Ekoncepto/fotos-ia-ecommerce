@@ -57,6 +57,25 @@ describe('ImageGenerator', () => {
     expect(screen.getByText('Créditos disponíveis: 90')).toBeInTheDocument();
   });
 
+  it('should disable the button during image generation', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 100 }) });
+    // Mock a slow response for generate image
+    mockFetch.mockResolvedValueOnce(new Promise(resolve => setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({ message: 'Image generation successful', remainingCredits: 90 }) }), 100)));
+
+    render(<ImageGenerator />);
+
+    const button = await screen.findByRole('button', { name: 'Gerar Fotos' });
+    expect(button).toBeEnabled();
+
+    fireEvent.click(button);
+
+    // Button should be disabled immediately after click
+    expect(button).toBeDisabled();
+
+    // Wait for the process to complete
+    await waitFor(() => expect(button).toBeEnabled());
+  });
+
   it('should show error message if image generation fails', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ amount: 100 }) });
     mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });

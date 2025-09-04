@@ -18,3 +18,29 @@ top_issues:
     finding: 'Credit Manipulation/Exploitation'
     suggested_action: 'Implement strong authentication, authorization, and rate limiting for credit-related API endpoints.'
 waiver: { active: false }
+trace:
+  totals:
+    requirements: 4
+    full: 2
+    partial: 2
+    none: 0
+  uncovered:
+    - ac: 'AC1'
+      reason: 'Lack of atomicity and race condition coverage.'
+    - ac: 'AC3'
+      reason: 'Lack of idempotency coverage.'
+  notes: 'See docs/qa/assessments/1.3.1-sistema-creditos-trace-20250904.md'
+nfr_validation:
+  _assessed: [security, performance, reliability, maintainability]
+  security:
+    status: CONCERNS
+    notes: 'Missing rate limiting on credit-related APIs.'
+  performance:
+    status: PASS
+    notes: 'No specific performance requirements defined.'
+  reliability:
+    status: FAIL
+    notes: 'Credit allocation is not atomic and consumption is not idempotent.'
+  maintainability:
+    status: CONCERNS
+    notes: 'Lack of robust tests for critical business logic.'

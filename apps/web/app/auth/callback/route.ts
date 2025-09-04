@@ -15,32 +15,23 @@ export async function GET(request: Request) {
       const initialCredits = 100; // TODO: Make this configurable (e.g., from environment variables or a config table)
       const creditsTableName = 'user_credits'; // TODO: Confirm actual table name
 
-      // Check if the user already has credits to prevent re-allocation on subsequent logins
-      const { data: existingCredits, error: fetchError } = await supabase
+      // Atomically allocate initial credits if the user doesn't have an entry yet.
+      // The `onConflict` option with `ignoreDuplicates: true` ensures that if a row
+      // with the same `user_id` already exists, the insert is ignored instead of
+      // throwing an error. This is an atomic operation on the database side.
+      const { error: creditError } = await supabase
         .from(creditsTableName)
-        .select('id')
-        .eq('user_id', userId)
-        .single();
+        .insert(
+          [{ user_id: userId, amount: initialCredits }],
+          { onConflict: 'user_id', ignoreDuplicates: true }
+        );
 
-      if (fetchError && fetchError.code === 'PGRST116') { // PGRST116 means "no rows found"
-        // User does not have existing credits, allocate them
-        const { error: insertError } = await supabase
-          .from(creditsTableName)
-          .insert([
-            { user_id: userId, amount: initialCredits }
-          ]);
-
-        if (insertError) {
-          console.error('Error allocating initial credits:', insertError);
-          // Optionally, redirect to an error page or handle gracefully
-          return NextResponse.redirect(`${origin}/auth/credit-allocation-error`);
-        }
-      } else if (fetchError) {
-        console.error('Error checking existing credits:', fetchError);
-        // Optionally, redirect to an error page or handle gracefully
-        return NextResponse.redirect(`${origin}/auth/credit-check-error`);
+      if (creditError) {
+        console.error('Error allocating initial credits:', creditError);
+        // If credit allocation fails, we still log the user in but redirect
+        // to an error page so the issue can be surfaced.
+        return NextResponse.redirect(`${origin}/auth/credit-allocation-error`);
       }
-      // If existingCredits is not null, credits already exist, do nothing.
 
       return NextResponse.redirect(`${origin}${next}`)
     }

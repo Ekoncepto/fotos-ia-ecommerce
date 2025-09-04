@@ -30,12 +30,14 @@ export default function ImageGenerator() {
     fetchCredits();
   }, []);
 
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const handleGenerateImage = async () => {
-    if (credits === null || credits < IMAGE_GENERATION_COST) {
-      setMessage('Créditos insuficientes para gerar imagens.');
+    if (credits === null || credits < IMAGE_GENERATION_COST || isGenerating) {
       return;
     }
 
+    setIsGenerating(true);
     setMessage('Gerando imagem...');
     try {
       const response = await fetch('/api/generate-image', {
@@ -57,15 +59,16 @@ export default function ImageGenerator() {
       const data = await response.json();
       setCredits(data.remainingCredits);
       setMessage('Imagem gerada com sucesso!');
-      // Optionally, refresh the page or update UI to show new image
-      router.refresh(); // Refresh current route to re-fetch data
+      router.refresh();
     } catch (error) {
       console.error('Error generating image:', error);
       setMessage('Erro ao gerar imagem.');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  const canGenerate = credits !== null && credits >= IMAGE_GENERATION_COST;
+  const canGenerate = credits !== null && credits >= IMAGE_GENERATION_COST && !isGenerating;
 
   if (isLoading) {
     return <div>Carregando créditos...</div>;

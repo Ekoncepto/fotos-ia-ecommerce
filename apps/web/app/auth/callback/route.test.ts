@@ -4,11 +4,8 @@ import { NextResponse } from 'next/server';
 import { vi } from 'vitest';
 
 // Create stable mock functions
-const mockSingle = vi.fn();
 const mockInsert = vi.fn();
-const mockEq = vi.fn(() => ({ single: mockSingle }));
-const mockSelect = vi.fn(() => ({ eq: mockEq }));
-const mockFrom = vi.fn(() => ({ select: mockSelect, insert: mockInsert }));
+const mockFrom = vi.fn(() => ({ insert: mockInsert }));
 const mockExchangeCodeForSession = vi.fn();
 
 // Mock the server-side Supabase client
@@ -35,12 +32,11 @@ describe('Auth Callback Route', () => {
     vi.clearAllMocks();
   });
 
-  it('should allocate credits for a new user', async () => {
+  it('should attempt to allocate credits for a new user and redirect to home', async () => {
     mockExchangeCodeForSession.mockResolvedValue({
       data: { user: { id: 'user-123' } },
       error: null,
     });
-    mockSingle.mockResolvedValue({ data: null, error: { code: 'PGRST116' } }); // No rows found
     mockInsert.mockResolvedValue({ error: null });
 
     const request = new Request(`${origin}/auth/callback?code=test-code`);
@@ -48,23 +44,10 @@ describe('Auth Callback Route', () => {
 
     expect(mockExchangeCodeForSession).toHaveBeenCalledWith('test-code');
     expect(mockFrom).toHaveBeenCalledWith('user_credits');
-    expect(mockInsert).toHaveBeenCalledWith([{ user_id: 'user-123', amount: 100 }]);
-    expect(NextResponse.redirect).toHaveBeenCalledWith(`${origin}/`);
-  });
-
-  it('should not re-allocate credits for an existing user', async () => {
-    mockExchangeCodeForSession.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    });
-    mockSingle.mockResolvedValue({ data: { id: 'credit-id' }, error: null }); // Credits already exist
-
-    const request = new Request(`${origin}/auth/callback?code=test-code`);
-    await GET(request);
-
-    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('test-code');
-    expect(mockFrom).toHaveBeenCalledWith('user_credits');
-    expect(mockInsert).not.toHaveBeenCalled(); // Should not insert
+    expect(mockInsert).toHaveBeenCalledWith(
+      [{ user_id: 'user-123', amount: 100 }],
+      { onConflict: 'user_id', ignoreDuplicates: true }
+    );
     expect(NextResponse.redirect).toHaveBeenCalledWith(`${origin}/`);
   });
 
@@ -86,25 +69,11 @@ describe('Auth Callback Route', () => {
       data: { user: { id: 'user-123' } },
       error: null,
     });
-    mockSingle.mockResolvedValue({ data: null, error: { code: 'PGRST116' } });
     mockInsert.mockResolvedValue({ error: new Error('Insert error') });
 
     const request = new Request(`${origin}/auth/callback?code=test-code`);
     await GET(request);
 
     expect(NextResponse.redirect).toHaveBeenCalledWith(`${origin}/auth/credit-allocation-error`);
-  });
-
-  it('should redirect to credit check error page if fetching existing credits fails (not PGRST116)', async () => {
-    mockExchangeCodeForSession.mockResolvedValue({
-      data: { user: { id: 'user-123' } },
-      error: null,
-    });
-    mockSingle.mockResolvedValue({ data: null, error: new Error('Fetch error') }); // General fetch error
-
-    const request = new Request(`${origin}/auth/callback?code=test-code`);
-    await GET(request);
-
-    expect(NextResponse.redirect).toHaveBeenCalledWith(`${origin}/auth/credit-check-error`);
   });
 });
