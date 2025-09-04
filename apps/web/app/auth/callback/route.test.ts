@@ -1,6 +1,4 @@
-import { GET } from './route';
 import { vi } from 'vitest';
-import { NextResponse } from 'next/server';
 
 describe('Auth Callback Route', () => {
   beforeEach(() => {
