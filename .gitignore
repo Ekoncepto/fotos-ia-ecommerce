@@ -19,6 +19,9 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Test results
+**/results.json
+
 # Environment variables
 .env
 .env*.local
