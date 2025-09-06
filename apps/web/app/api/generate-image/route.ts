@@ -2,13 +2,49 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { IMAGE_GENERATION_COST } from 'config/credits';
 
-// Helper function to create a delay
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Simulates a call to an AI image generation service with a retry mechanism.
+ */
+async function generateImagesWithRetry(productName: string): Promise<string[]> {
+  const MAX_RETRIES = 3;
+  for (let i = 0; i < MAX_RETRIES; i++) {
+    try {
+      // TODO: BUS-001 - Implement sophisticated prompt engineering here.
+      // The prompt should be constructed based on product name, category,
+      // reference images, and user preferences to maximize image quality.
+
+      // Simulate network delay and processing time of the AI service.
+      await sleep(2000);
+
+      // To test retries, one could simulate a failure here, e.g.,
+      // if (i < 2) throw new Error("AI service temporarily unavailable");
+
+      const productNameEncoded = encodeURIComponent(productName);
+      const imageUrls = [
+        `https://placehold.co/1024x1024/FFFFFF/000000/png?text=${productNameEncoded}\\n(Fundo Branco)`,
+        `https://placehold.co/1024x1024/CCCCCC/000000/png?text=${productNameEncoded}\\n(Estilo de Vida)`,
+      ];
+
+      // If successful, return the URLs.
+      return imageUrls;
+    } catch (error) {
+      console.error(`Attempt ${i + 1} failed for image generation. Retrying...`);
+      if (i === MAX_RETRIES - 1) {
+        // If this was the last retry, re-throw the error.
+        throw new Error("AI image generation failed after multiple attempts.");
+      }
+    }
+  }
+  // This line should be unreachable, but typescript needs it.
+  throw new Error("Image generation failed unexpectedly.");
+}
+
 
 export async function POST(request: Request) {
   const supabase = createClient();
 
-  // 1. Get user and product_id from request
   const { product_id } = await request.json();
   if (!product_id) {
     return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -19,7 +55,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // 2. Deduct credits
   const { data: remainingCredits, error: creditError } = await supabase.rpc('deduct_credits', {
     user_id_input: user.id,
     cost: IMAGE_GENERATION_COST,
@@ -33,7 +68,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to deduct credits' }, { status: 500 });
   }
 
-  // 3. Fetch product information (optional for mock, but good practice)
   const { data: product, error: productError } = await supabase
     .from('products')
     .select('name')
@@ -45,26 +79,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to find product' }, { status: 404 });
   }
 
-  // 4. Mock AI Image Generation
-  // Simulate a delay for the generation process
-  await sleep(2000);
+  try {
+    // TODO: TECH-001 - For a real implementation, add a circuit breaker (e.g., using 'opossum')
+    // around this call to prevent cascading failures if the AI service is down.
+    const imageUrls = await generateImagesWithRetry(product.name);
 
-  // Create placeholder images based on product name
-  const productNameEncoded = encodeURIComponent(product.name);
-  const imageUrls = [
-    `https://placehold.co/1024x1024/FFFFFF/000000/png?text=${productNameEncoded}\\n(Fundo Branco)`,
-    `https://placehold.co/1024x1024/CCCCCC/000000/png?text=${productNameEncoded}\\n(Estilo de Vida)`,
-  ];
+    console.log(`User ${user.id} generated images for product ${product_id}. Remaining credits: ${remainingCredits}`);
 
-  // In a real application, you would save these URLs to the product record:
-  // await supabase.from('products').update({ generated_image_urls: imageUrls }).eq('id', product_id);
+    return NextResponse.json({
+      message: 'Image generation successful',
+      remainingCredits,
+      imageUrls,
+    }, { status: 200 });
 
-  console.log(`User ${user.id} generated images for product ${product_id}. Remaining credits: ${remainingCredits}`);
-
-  // 5. Return the generated image URLs and remaining credits
-  return NextResponse.json({
-    message: 'Image generation successful',
-    remainingCredits,
-    imageUrls,
-  }, { status: 200 });
+  } catch (error) {
+    console.error('Error generating images:', error);
+    // TODO: Here you might want to refund the credits if the generation ultimately fails.
+    return NextResponse.json({ error: 'Image generation failed after multiple retries.' }, { status: 500 });
+  }
 }

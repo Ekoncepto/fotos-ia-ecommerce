@@ -146,8 +146,15 @@ export function ImageUploadForm() {
 
     } catch (error) {
       console.error("Erro no processo de geração:", error);
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
-      setMessage(`Erro: ${errorMessage}`);
+      let friendlyMessage = 'Ocorreu um erro inesperado durante o processo.';
+      if (error instanceof Error) {
+        if (error.message.includes('multiple retries')) {
+          friendlyMessage = 'Não foi possível gerar as imagens no momento. Por favor, tente novamente mais tarde.';
+        } else {
+          friendlyMessage = error.message;
+        }
+      }
+      setMessage(`Erro: ${friendlyMessage}`);
     } finally {
       setIsGenerating(false);
     }
@@ -218,9 +225,9 @@ export function ImageUploadForm() {
         </form>
       </CardContent>
       {generatedImages.length > 0 && (
-        <CardFooter className="flex flex-col items-center">
+        <CardFooter className="flex flex-col items-center w-full">
           <h3 className="text-lg font-semibold mb-2">Imagens Geradas</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 w-full">
             {generatedImages.map((src, index) => (
               <div key={index}>
                 <img src={src} alt={`Generated image ${index + 1}`} className="rounded-md" />
@@ -228,6 +235,10 @@ export function ImageUploadForm() {
               </div>
             ))}
           </div>
+          {/* TODO: BUS-001 - Implement user feedback mechanism. This could involve a modal with a form. */}
+          <Button variant="outline" disabled className="mt-4">
+            Avaliar Imagens
+          </Button>
         </CardFooter>
       )}
     </Card>
