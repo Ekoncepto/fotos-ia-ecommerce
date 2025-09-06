@@ -1,5 +1,4 @@
 import { POST } from './route';
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { vi } from 'vitest';
 import { IMAGE_GENERATION_COST } from 'config/credits';
@@ -29,7 +28,7 @@ vi.mock('next/server', () => ({
 
 describe('Generate Image API Route', () => {
   const mockProductId = 'prod-456';
-  const mockRequest = (body: any) => new Request('http://localhost/api/generate-image', {
+  const mockRequest = (body: Record<string, unknown>) => new Request('http://localhost/api/generate-image', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -59,7 +58,7 @@ describe('Generate Image API Route', () => {
 
     expect(mockFrom).toHaveBeenCalledWith('products');
 
-    const responsePayload = (NextResponse.json as any).mock.calls[0][0];
+    const responsePayload = (NextResponse.json as unknown as vi.Mock).mock.calls[0][0] as { message: string, remainingCredits: number, imageUrls: string[] };
     expect(responsePayload.message).toBe('Image generation successful');
     expect(responsePayload.remainingCredits).toBe(40);
     expect(responsePayload.imageUrls).toHaveLength(2);
