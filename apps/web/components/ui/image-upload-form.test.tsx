@@ -33,7 +33,7 @@ describe('ImageUploadForm', () => {
         });
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as Response);
-    }) as any;
+    }) as vi.Mock;
   });
 
   afterEach(() => {
@@ -91,7 +91,7 @@ describe('ImageUploadForm', () => {
           });
         }
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as Response);
-      }) as any;
+      }) as vi.Mock;
 
     render(<ImageUploadForm />);
     await screen.findByText(/Créditos disponíveis: 0/i);
