@@ -2,7 +2,7 @@
 
 [build]
   # Command to build the site
-  command = "turbo build --filter=web"
+  command = "npm run migrate && turbo build --filter=web"
 
   # Directory to publish
   publish = "apps/web/.next"
