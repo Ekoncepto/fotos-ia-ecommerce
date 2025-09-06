@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import DOMPurify from 'dompurify';
+import Image from "next/image";
 import { IMAGE_GENERATION_COST } from 'config/credits';
 
 export function ImageUploadForm() {
@@ -230,7 +231,7 @@ export function ImageUploadForm() {
           <div className="grid grid-cols-2 gap-4 w-full">
             {generatedImages.map((src, index) => (
               <div key={index}>
-                <img src={src} alt={`Generated image ${index + 1}`} className="rounded-md" />
+                <Image src={src} alt={`Generated image ${index + 1}`} className="rounded-md" width={512} height={512} />
                 <p className="text-center text-sm mt-1">{index === 0 ? 'Fundo Branco' : 'Estilo de Vida'}</p>
               </div>
             ))}
