@@ -1,0 +1,40 @@
+schema: 1
+story: "1.4"
+story_title: "Geração de Pacote de Imagens"
+gate: CONCERNS
+status_reason: "Two high-risk items were identified related to the quality of the generated images and the reliability of the external AI service integration. These risks should be addressed."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-09-04T14:54:57Z"
+waiver: { active: false }
+top_issues:
+  - id: "BUS-001"
+    severity: high
+    finding: "Generated images may be of low quality, failing to meet user expectations and business goals."
+    suggested_action: "Implement user feedback mechanisms and optimize prompt engineering."
+  - id: "TECH-001"
+    severity: high
+    finding: "The integration with the external AI image generation service is a single point of failure."
+    suggested_action: "Implement circuit breakers, retries, and proper user feedback for service failures."
+risk_summary:
+  totals: { critical: 0, high: 2, medium: 1, low: 2 }
+  highest:
+    id: BUS-001
+    score: 6
+    title: 'Generated images are low quality'
+  recommendations:
+    must_fix:
+      - 'Address the potential for low-quality images by implementing feedback loops and better prompt strategies.'
+      - 'Build resilience into the AI service integration with error handling and circuit breakers.'
+    monitor:
+      - 'Track image generation times to ensure they stay within an acceptable range.'
+test_design:
+  scenarios_total: 9
+  by_level:
+    unit: 2
+    integration: 3
+    e2e: 4
+  by_priority:
+    p0: 2
+    p1: 5
+    p2: 2
+  coverage_gaps: []

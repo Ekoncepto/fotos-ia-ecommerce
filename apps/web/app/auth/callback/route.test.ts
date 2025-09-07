@@ -1,5 +1,4 @@
 import { GET } from './route';
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { vi } from 'vitest';
 import { INITIAL_CREDITS } from 'config/credits';

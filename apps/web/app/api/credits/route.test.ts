@@ -1,5 +1,4 @@
 import { GET } from './route';
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { vi } from 'vitest';
 
@@ -37,7 +36,7 @@ describe('Credits API Route', () => {
     mockSingle.mockResolvedValue({ data: { amount: 50 }, error: null });
 
     const request = new Request('http://localhost:3000/api/credits');
-    const response = await GET(request);
+    await GET(request);
 
     expect(mockGetUser).toHaveBeenCalled();
     expect(mockFrom).toHaveBeenCalledWith('user_credits');
