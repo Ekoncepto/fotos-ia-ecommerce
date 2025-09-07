@@ -1,19 +1,22 @@
 # Netlify configuration file
 
+# Production context (main branch)
 [build]
-  # Command to build the site
   command = "npm run migrate && turbo build --filter=web"
-
-  # Directory to publish
   publish = "apps/web/.next"
 
 [build.environment]
-  # Set the Node.js version
   NODE_VERSION = "20"
+  NPM_VERSION = "10.5.0"
 
-  # Set the npm version
+# Staging context (staging branch)
+[context.staging]
+  command = "npm run migrate && turbo build --filter=web"
+  publish = "apps/web/.next"
+
+[context.staging.environment]
+  NODE_VERSION = "20"
   NPM_VERSION = "10.5.0"
 
 [[plugins]]
-  # Essential Next.js plugin for Netlify
   package = "@netlify/plugin-nextjs"
