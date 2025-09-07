@@ -7,7 +7,7 @@
     "start": "./node_modules/.bin/turbo start",
     "lint": "./node_modules/.bin/turbo lint",
     "test": "./node_modules/.bin/turbo test",
-    "migrate": "supabase db push"
+    "migrate": "supabase db push --db-url \"$DB_POOLER_URL\""
   },
   "workspaces": [
     "apps/*",
