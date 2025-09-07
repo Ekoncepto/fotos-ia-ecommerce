@@ -2,21 +2,13 @@
 
 # Production context (main branch)
 [build]
-  command = "npx run migrate && turbo build --filter=web"
+  command = "npm run migrate && turbo build --filter=web"
   publish = "apps/web/.next"
-
-[build.environment]
-  NODE_VERSION = "20"
-  NPM_VERSION = "10.5.0"
 
 # Staging context (staging branch)
 [context.staging]
-  command = "npx run migrate && turbo build --filter=web"
+  command = "npm run migrate && turbo build --filter=web"
   publish = "apps/web/.next"
-
-[context.staging.environment]
-  NODE_VERSION = "20"
-  NPM_VERSION = "10.5.0"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

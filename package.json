@@ -19,10 +19,10 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
-    "supabase": "^1.187.3",
+    "supabase": "latest",
     "turbo": "latest"
   },
-  "packageManager": "npm@10.5.0",
+  "packageManager": "npm@10.8.2",
   "dependencies": {
     "dompurify": "^3.2.6",
     "uuid": "^11.1.0"
