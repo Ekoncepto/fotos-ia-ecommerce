@@ -29,7 +29,7 @@ async function generateImagesWithRetry(productName: string): Promise<string[]> {
 
       // If successful, return the URLs.
       return imageUrls;
-    } catch (error) {
+    } catch {
       console.error(`Attempt ${i + 1} failed for image generation. Retrying...`);
       if (i === MAX_RETRIES - 1) {
         // If this was the last retry, re-throw the error.
