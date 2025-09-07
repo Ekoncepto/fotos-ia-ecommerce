@@ -16,14 +16,14 @@ export async function GET(request: Request) {
       const creditsTableName = 'user_credits'; // TODO: Confirm actual table name
 
       // Atomically allocate initial credits if the user doesn't have an entry yet.
-      // The `onConflict` option with `ignoreDuplicates: true` ensures that if a row
+      // The `upsert` method with the `onConflict` option ensures that if a row
       // with the same `user_id` already exists, the insert is ignored instead of
       // throwing an error. This is an atomic operation on the database side.
       const { error: creditError } = await supabase
         .from(creditsTableName)
-        .insert(
+        .upsert(
           [{ user_id: userId, amount: INITIAL_CREDITS }],
-          { onConflict: 'user_id', ignoreDuplicates: true }
+          { onConflict: 'user_id' }
         );
 
       if (creditError) {
