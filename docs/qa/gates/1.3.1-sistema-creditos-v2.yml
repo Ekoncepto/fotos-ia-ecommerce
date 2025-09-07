@@ -1,0 +1,26 @@
+schema: 1
+story: '1.3.1'
+story_title: 'Sistema de Créditos'
+gate: PASS
+status_reason: 'The developer has addressed the critical issues from the previous review. The credit system is now more reliable.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-09-05T18:00:00Z'
+top_issues: []
+waiver: { active: false }
+quality_score: 90
+evidence:
+  tests_reviewed: 4
+  risks_identified: 0
+  trace:
+    totals:
+      requirements: 4
+      full: 4
+      partial: 0
+      none: 0
+    planning_ref: null
+    uncovered: []
+    notes: 'Integration and concurrent tests are still missing, but this can be addressed in a future story.'
+history:
+  - at: '2025-09-04T18:00:00Z'
+    gate: CONCERNS
+    note: 'Initial review.'

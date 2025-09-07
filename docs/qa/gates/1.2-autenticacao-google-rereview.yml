@@ -1,0 +1,26 @@
+schema: 1
+story: '1.2'
+story_title: 'Autenticação com Google'
+gate: PASS
+status_reason: 'Re-review of the story. No changes found since the last PASS.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-09-05T18:00:00Z'
+top_issues: []
+waiver: { active: false }
+quality_score: 100
+evidence:
+  tests_reviewed: 2
+  risks_identified: 0
+  trace:
+    totals:
+      requirements: 4
+      full: 4
+      partial: 0
+      none: 0
+    planning_ref: null
+    uncovered: []
+    notes: 'N/A'
+history:
+  - at: '2025-09-04T18:00:00Z'
+    gate: PASS
+    note: 'Initial review.'

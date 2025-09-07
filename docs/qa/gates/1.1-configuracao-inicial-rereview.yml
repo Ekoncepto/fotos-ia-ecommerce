@@ -1,0 +1,29 @@
+schema: 1
+story: '1.1'
+story_title: 'Configuração Inicial'
+gate: PASS
+status_reason: 'Re-review of the story. No changes found since the last PASS.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-09-05T18:00:00Z'
+top_issues: []
+waiver: { active: false }
+quality_score: 100
+evidence:
+  tests_reviewed: 1
+  risks_identified: 0
+  trace:
+    totals:
+      requirements: 4
+      full: 4
+      partial: 0
+      none: 0
+    planning_ref: null
+    uncovered: []
+    notes: 'Ver docs/qa/assessments/1.1-configuracao-inicial-trace-20250905.md'
+history:
+  - at: '2025-09-04T18:00:00Z'
+    gate: FAIL
+    note: 'Revisão inicial - testes não executados.'
+  - at: '2025-09-05T15:00:00Z'
+    gate: PASS
+    note: 'Resolved test environment issues and validated CI/CD.'
