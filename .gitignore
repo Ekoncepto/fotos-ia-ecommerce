@@ -10,6 +10,8 @@ apps/*/node_modules/*
 /build
 /.next/
 /out/
+apps/*/.next/
+apps/*/.netlify/
 
 # Logs
 logs
