@@ -5,6 +5,9 @@
   command = "npm run migrate && turbo build --filter=web"
   publish = "apps/web/.next"
 
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_SUPABASE_URL"
+
 # Staging context (staging branch)
 [context.staging]
   command = "npm run migrate && turbo build --filter=web"
