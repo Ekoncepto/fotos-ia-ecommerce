@@ -1,0 +1,53 @@
+schema: 1
+story: '1.5'
+story_title: 'Redirecionamento de Login'
+gate: CONCERNS
+status_reason: 'Middleware e testes unitários cobrem os ACs principais; pendentes: seeding de sessão para E2E, teste de integração para refresh de sessão/cookies via @supabase/ssr e verificação de variáveis de ambiente em CI. Riscos altos identificados foram mitigados no código.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-09-10T12:05:30Z'
+waiver: { active: false }
+
+top_issues:
+  - id: 'OPS-001'
+    severity: medium
+    finding: 'Ausência de validação de NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY em CI/CD pode causar falhas de runtime.'
+    suggested_action: 'Adicionar verificação pré-build/test no pipeline e documentação de setup.'
+  - id: 'TECH-002'
+    severity: medium
+    finding: 'Falta teste de integração que valide o refresh de sessão e o set de cookies no NextResponse via @supabase/ssr.'
+    suggested_action: 'Implementar teste de integração cobrindo persistência de cookies e ramificações de usuário.'
+
+risk_summary:
+  totals: { critical: 0, high: 2, medium: 3, low: 3 }
+  highest:
+    id: SEC-001
+    score: 6
+    title: 'Bypass de autorização por configuração incorreta de rotas públicas'
+  recommendations:
+    must_fix:
+      - 'Implementar seeding de sessão para E2E e cobrir cenário de usuário autenticado em /login.'
+      - 'Criar teste de integração para refresh de sessão e set de cookies.'
+      - 'Adicionar checagem de variáveis de ambiente no CI.'
+    monitor:
+      - 'Monitorar taxas de 307/429 por rota e status de autenticação.'
+      - 'Observar TTFB em rotas protegidas após o middleware.'
+
+test_design:
+  scenarios_total: 14
+  by_level:
+    unit: 8
+    integration: 3
+    e2e: 3
+  by_priority:
+    p0: 6
+    p1: 6
+    p2: 2
+  coverage_gaps: []
+
+evidence:
+  tests_reviewed: 3
+  risks_identified: 8
+  trace:
+    ac_covered: [1, 2, 3, 5]
+    ac_gaps: [4, 6]
+
