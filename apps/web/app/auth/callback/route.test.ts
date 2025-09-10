@@ -4,8 +4,8 @@ import { vi } from 'vitest';
 import { INITIAL_CREDITS } from 'config/credits';
 
 // Create stable mock functions
-const mockInsert = vi.fn();
-const mockFrom = vi.fn(() => ({ insert: mockInsert }));
+const mockUpsert = vi.fn();
+const mockFrom = vi.fn(() => ({ upsert: mockUpsert }));
 const mockExchangeCodeForSession = vi.fn();
 
 // Mock the server-side Supabase client
@@ -37,16 +37,16 @@ describe('Auth Callback Route', () => {
       data: { user: { id: 'user-123' } },
       error: null,
     });
-    mockInsert.mockResolvedValue({ error: null });
+    mockUpsert.mockResolvedValue({ error: null });
 
     const request = new Request(`${origin}/auth/callback?code=test-code`);
     await GET(request);
 
     expect(mockExchangeCodeForSession).toHaveBeenCalledWith('test-code');
     expect(mockFrom).toHaveBeenCalledWith('user_credits');
-    expect(mockInsert).toHaveBeenCalledWith(
+    expect(mockUpsert).toHaveBeenCalledWith(
       [{ user_id: 'user-123', amount: INITIAL_CREDITS }],
-      { onConflict: 'user_id', ignoreDuplicates: true }
+      { onConflict: 'user_id' }
     );
     expect(NextResponse.redirect).toHaveBeenCalledWith(`${origin}/`);
   });
@@ -64,12 +64,12 @@ describe('Auth Callback Route', () => {
     expect(NextResponse.redirect).toHaveBeenCalledWith(`${origin}/auth/auth-code-error`);
   });
 
-  it('should redirect to credit allocation error page if insert fails', async () => {
+  it('should redirect to credit allocation error page if upsert fails', async () => {
     mockExchangeCodeForSession.mockResolvedValue({
       data: { user: { id: 'user-123' } },
       error: null,
     });
-    mockInsert.mockResolvedValue({ error: new Error('Insert error') });
+    mockUpsert.mockResolvedValue({ error: new Error('Upsert error') });
 
     const request = new Request(`${origin}/auth/callback?code=test-code`);
     await GET(request);

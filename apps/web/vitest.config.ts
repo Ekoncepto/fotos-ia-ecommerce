@@ -15,6 +15,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './'),
+      // Test-only stub for DOMPurify to avoid installing the package during unit tests
+      'dompurify': resolve(__dirname, './test-stubs/dompurify.ts'),
     },
   },
 })
