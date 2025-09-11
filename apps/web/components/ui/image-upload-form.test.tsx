@@ -81,6 +81,27 @@ describe('ImageUploadForm', () => {
     });
   });
 
+  it('should display helpful upload tips without affecting inputs', async () => {
+    render(<ImageUploadForm />);
+    // Tips are visible and accessible
+    expect(await screen.findByLabelText(/Dicas de Foto/i)).toBeInTheDocument();
+    expect(screen.getByText(/boa iluminação/i)).toBeInTheDocument();
+
+    // Inputs continue to work normally
+    const nameInput = screen.getByLabelText(/Nome do Produto/i);
+    const categoryInput = screen.getByLabelText(/Categoria/i);
+    const fileInput = screen.getByLabelText(/Imagens de Referência/i);
+
+    // Fill values to ensure no interference
+    fireEvent.change(nameInput, { target: { value: 'Produto X' } });
+    fireEvent.change(categoryInput, { target: { value: 'Categoria Y' } });
+    const file = new File(['abc'], 'a.png', { type: 'image/png' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    expect(nameInput).toHaveValue('Produto X');
+    expect(categoryInput).toHaveValue('Categoria Y');
+    expect((fileInput as HTMLInputElement).files?.length).toBe(1);
+  });
   it('should disable the button if credits are insufficient', async () => {
      // Override fetch mock for this specific test
      global.fetch = vi.fn((url) => {

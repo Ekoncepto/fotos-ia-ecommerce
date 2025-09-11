@@ -16,6 +16,7 @@ import { createClient } from "@/lib/supabase/client";
 import DOMPurify from 'dompurify';
 import Image from "next/image";
 import { IMAGE_GENERATION_COST } from 'config/credits';
+import { UploadTips } from "@/components/ui/upload-tips";
 
 export function ImageUploadForm() {
   const supabase = createClient();
@@ -180,6 +181,8 @@ export function ImageUploadForm() {
             </>
           )}
         </div>
+        {/* Tips are intentionally non-interactive to avoid interfering with the upload flow */}
+        <UploadTips className="mb-4" />
         <form onSubmit={handleSubmit}>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
